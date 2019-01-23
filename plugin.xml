@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+           id="cordova-plugin-sketch"
+      version="0.1.0">
+
+    <name>Sketch</name>
+    <description>Cordova Sketch Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,sketch,signature,draw</keywords>
+
+    <js-module src="www/sketch.js" name="sketch">
+        <clobbers target="navigator.sketch" />
+    </js-module>
+
+    <!-- windows -->
+    <platform name="windows">
+        <js-module src="src/windows/sketchProxy.js" name="SketchProxy">
+            <merges target="" />
+        </js-module>
+        <asset src="www/css/cordova-plugin-sketch.css"
+            target="cordova-plugin-sketch/css/cordova-plugin-sketch.css" />
+        <asset src="www/css/program.css" target="cordova-plugin-sketch/css/program.css" />
+        <asset src="www/images/Erase.cur" target="cordova-plugin-sketch/images/Erase.cur" />
+        <asset src="www/images/Select.png" target="cordova-plugin-sketch/images/Select.png" />
+        <asset src="www/canvasHtml.js" target="cordova-plugin-sketch/canvasHtml.js" />
+        <asset src="www/program.js" target="cordova-plugin-sketch/program.js" />
+        <config-file target="package.appxmanifest" parent="/Package/Capabilities" versions=">=8.1.0">
+            <Capability Name="picturesLibrary" />
+        </config-file>
+    </platform>
+
+    <!-- iOS -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="SketchPlugin">
+                <param name="ios-package" value="BGSketchPlugin"/>
+            </feature>
+        </config-file>
+        <header-file src="src/ios/BGSketchPlugin.h" />
+        <source-file src="src/ios/BGSketchPlugin.m" />
+        <header-file src="src/ios/TouchDraw/BGTouchDrawView.h" />
+        <source-file src="src/ios/TouchDraw/BGTouchDrawView.m" />
+        <header-file src="src/ios/TouchDraw/BGTouchDrawViewController.h" />
+        <source-file src="src/ios/TouchDraw/BGTouchDrawViewController.m" />
+        <header-file src="src/ios/TouchDraw/UIImage+ImageWithColor.h" />
+        <source-file src="src/ios/TouchDraw/UIImage+ImageWithColor.m" />
+    </platform>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="config.xml" parent="/*">
+            <feature name="SketchPlugin">
+                <param name="android-package"
+                    value="au.com.blinkmobile.cordova.sketch.Sketch"/>
+            </feature>
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <activity
+                android:name="au.com.blinkmobile.cordova.sketch.TouchDrawActivity"
+                android:configChanges="orientation|screenSize" >
+            </activity>
+        </config-file>
+        <!-- Required for saving generated sketches to the photo library -->
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        </config-file>
+        <source-file src="src/android/Sketch.java"
+            target-dir="src/au/com/blinkmobile/cordova/sketch" />
+        <source-file src="src/android/TouchDrawActivity.java"
+            target-dir="src/au/com/blinkmobile/cordova/sketch" />
+    </platform>
+
+</plugin>
