@@ -54,7 +54,7 @@ public class TouchDrawActivity extends Activity {
 
     private Paint mPaint;
     private int mStrokeWidth = 4;
-    private int mScale = 75;
+    private int mScale = 100;
     private Bitmap mBitmap;
     private TouchDrawView mTdView;
     private BackgroundImageType mBackgroundImageType = BackgroundImageType.COLOUR;
@@ -150,8 +150,8 @@ public class TouchDrawActivity extends Activity {
         LinearLayout buttonBar = new LinearLayout(this);
 
         Button doneButton = new Button(this);
-        doneButton.setText("Done");
-        doneButton.setBackgroundColor(Color.GREEN);
+        doneButton.setText("Save");
+        doneButton.setBackgroundColor(Color.parseColor("#28a745"));
         doneButton.setLayoutParams(new LinearLayout.LayoutParams(
                 0, ViewGroup.LayoutParams.MATCH_PARENT, (float) 0.30));
         doneButton.setOnClickListener(new View.OnClickListener() {
@@ -162,8 +162,9 @@ public class TouchDrawActivity extends Activity {
         });
 
         Button eraseButton = new Button(this);
-        eraseButton.setText("Erase");
-        eraseButton.setBackgroundColor(Color.GRAY);
+        eraseButton.setText("Clear");
+        eraseButton.setTextColor(Color.BLACK);
+        eraseButton.setBackgroundColor(Color.parseColor("#f8f9fa"));
         eraseButton.setLayoutParams(new LinearLayout.LayoutParams(
                 0, ViewGroup.LayoutParams.MATCH_PARENT, (float) 0.30));
         eraseButton.setOnClickListener(new View.OnClickListener() {
@@ -175,7 +176,7 @@ public class TouchDrawActivity extends Activity {
 
         Button cancelButton = new Button(this);
         cancelButton.setText("Cancel");
-        cancelButton.setBackgroundColor(Color.RED);
+        cancelButton.setBackgroundColor(Color.parseColor("#dc3545"));
         cancelButton.setLayoutParams(new LinearLayout.LayoutParams(
                 0, ViewGroup.LayoutParams.MATCH_PARENT, (float) 0.30));
         cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -556,10 +557,9 @@ public class TouchDrawActivity extends Activity {
                 !base64DataUrl.matches("data:.*;base64,.*")) {
             throw new URISyntaxException(base64DataUrl, "invalid data url");
         }
-        //base64DataUrl = URLDecoder.decode(base64DataUrl);
         String base64 = base64DataUrl.split("base64,")[1];
         base64 = base64.replace("%0A", "");
-        Log.v("base64", base64);
+        //Log.v("base64", base64);
         byte[] imgData = Base64.decode(base64, Base64.DEFAULT);
 
         BitmapFactory.Options opts = new BitmapFactory.Options();

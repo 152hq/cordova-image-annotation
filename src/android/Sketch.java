@@ -299,7 +299,7 @@ public class Sketch extends CordovaPlugin {
 
             if (destinationType == DestinationType.DATA_URL) {
                 output = "data:image/" + ext + ";base64," + Base64.encodeToString(drawingData, Base64.DEFAULT);
-                Log.v("output", output);
+                //Log.v("output", output);
             } else if (destinationType == DestinationType.FILE_URI) {
                 // Save the drawing to the app's cache dir
                 String fileName = String.format("sketch-%s.%s", UUID.randomUUID(), ext);
