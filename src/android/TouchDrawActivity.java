@@ -12,6 +12,8 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.LruCache;
 import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
@@ -34,9 +36,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
-
 public class TouchDrawActivity extends Activity {
     public static final String DRAWING_RESULT_PARCELABLE = "drawing_result";
     public static final String DRAWING_RESULT_ERROR = "drawing_error";
@@ -47,6 +49,8 @@ public class TouchDrawActivity extends Activity {
     public static final int RESULT_TOUCHDRAW_ERROR = Activity.RESULT_FIRST_USER;
     public static final String DRAWING_RESULT_SCALE = "drawing_scale";
     public static final String DRAWING_RESULT_ENCODING_TYPE = "drawing_encoding_type";
+    public static LruCache<String, String> mMemoryCache;
+    public static LruCache<String, ByteArrayOutputStream> rMemoryCache;
 
     private Paint mPaint;
     private int mStrokeWidth = 4;
@@ -79,7 +83,8 @@ public class TouchDrawActivity extends Activity {
         if (intentExtras != null) {
             mBackgroundImageType = BackgroundImageType.values()[
                     intentExtras.getInt(BACKGROUND_IMAGE_TYPE, BackgroundImageType.COLOUR.ordinal())];
-            mBackgroundImageUrl = intentExtras.getString(BACKGROUND_IMAGE_URL, mBackgroundImageUrl);
+            //mBackgroundImageUrl = intentExtras.getString(BACKGROUND_IMAGE_URL, mBackgroundImageUrl);
+            mBackgroundImageUrl = mMemoryCache.get(BACKGROUND_IMAGE_URL);
             mBackgroundColor = intentExtras.getString(BACKGROUND_COLOUR, mBackgroundColor);
             mStrokeWidth = intentExtras.getInt(STROKE_WIDTH, mStrokeWidth);
             mScale = intentExtras.getInt(DRAWING_RESULT_SCALE, mScale);
@@ -306,8 +311,8 @@ public class TouchDrawActivity extends Activity {
                     mBitmap = loadMutableBitmapFromFileURI(new URI(mBackgroundImageUrl));
                     break;
                 case DATA_URL:
-                   mBitmap = loadMutableBitmapFromBase64DataUrl(mBackgroundImageUrl);
-                   break;
+                    mBitmap = loadMutableBitmapFromBase64DataUrl(mBackgroundImageUrl);
+                    break;
                 default:
                     return;
             }
@@ -358,7 +363,13 @@ public class TouchDrawActivity extends Activity {
         scaleBitmap(mBitmap).compress(mEncodingType, 100, drawing);
 
         Intent drawingResult = new Intent();
-        drawingResult.putExtra(DRAWING_RESULT_PARCELABLE, drawing.toByteArray());
+        //drawingResult.putExtra(DRAWING_RESULT_PARCELABLE, drawing.toByteArray());
+
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        rMemoryCache = new LruCache<String, ByteArrayOutputStream>(maxMemory) {
+        };
+        rMemoryCache.put(DRAWING_RESULT_PARCELABLE, drawing);
+
         setResult(Activity.RESULT_OK, drawingResult);
         finish();
     }
@@ -414,11 +425,11 @@ public class TouchDrawActivity extends Activity {
             } else {
                 try {
                     if (mBackgroundImageType == BackgroundImageType.FILE_URL) {
-                            mBitmap = loadMutableBitmapFromFileURI(new URI(mBackgroundImageUrl));
+                        mBitmap = loadMutableBitmapFromFileURI(new URI(mBackgroundImageUrl));
 
-                            if (mBitmap == null) {
-                                throw new IOException("Failed to read file: " + mBackgroundImageUrl);
-                            }
+                        if (mBitmap == null) {
+                            throw new IOException("Failed to read file: " + mBackgroundImageUrl);
+                        }
                     } else if (mBackgroundImageType == BackgroundImageType.DATA_URL) {
                         mBitmap = loadMutableBitmapFromBase64DataUrl(mBackgroundImageUrl);
                     }
@@ -545,8 +556,10 @@ public class TouchDrawActivity extends Activity {
                 !base64DataUrl.matches("data:.*;base64,.*")) {
             throw new URISyntaxException(base64DataUrl, "invalid data url");
         }
-
+        //base64DataUrl = URLDecoder.decode(base64DataUrl);
         String base64 = base64DataUrl.split("base64,")[1];
+        base64 = base64.replace("%0A", "");
+        Log.v("base64", base64);
         byte[] imgData = Base64.decode(base64, Base64.DEFAULT);
 
         BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -591,3 +604,4 @@ public class TouchDrawActivity extends Activity {
     }
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
 }
+
